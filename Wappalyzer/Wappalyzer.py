@@ -5,7 +5,8 @@ import re
 import json
 import requests
 from bs4 import BeautifulSoup
-
+import urllib3
+urllib3.disable_warnings()
 
 class WebPage(object):
     """
@@ -27,10 +28,14 @@ class WebPage(object):
         headers : dict
             The HTTP response headers
         """
-        response = requests.get(url, verify=verify, timeout=30)
+        response = requests.get(url, verify=False, timeout=30)
         self.url = url
         # if use response.text, could have some error
-        self.html = response.content.decode('utf8')
+        try:
+            self.html = response.content.decode('utf8')
+        except UnicodeDecodeError:
+            self.html = response.content.decode('latin1')
+
         self.headers = response.headers
 
         # Parse the HTML with BeautifulSoup to find <script> and <meta> tags.
